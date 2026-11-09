@@ -1,0 +1,587 @@
+index.html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MC Maps — Карты Minecraft</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e17; --bg2:#111827; --card:#151c2c;
+    --accent:#22d3a5; --accent2:#8b5cf6;
+    --text:#e6edf7; --muted:#8b96ab; --border:#1f2937;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);
+    min-height:100vh;
+    background-image:
+      radial-gradient(circle at 15% 15%, rgba(34,211,165,.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(139,92,246,.08), transparent 40%);
+  }
+  header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:20px 40px;border-bottom:1px solid var(--border);
+    background:rgba(10,14,23,.85);backdrop-filter:blur(12px);
+    position:sticky;top:0;z-index:100;
+  }
+  .logo{font-family:'Press Start 2P',monospace;font-size:16px;color:var(--accent);
+    text-shadow:0 0 20px rgba(34,211,165,.6);}
+  nav{display:flex;gap:10px}
+  nav button{background:none;border:1px solid var(--border);color:var(--text);
+    padding:10px 18px;border-radius:10px;cursor:pointer;font-weight:600;transition:.25s;}
+  nav button:hover{border-color:var(--accent);color:var(--accent)}
+  nav button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border:none;color:#04140f;}
+  nav button.primary:hover{filter:brightness(1.1)}
+
+  .banner{margin:24px 40px;height:240px;border-radius:20px;overflow:hidden;
+    position:relative;border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#0d1117,#1a2233);
+    background-size:cover;background-position:center;}
+  .banner::after{content:'';position:absolute;inset:0;
+    background:linear-gradient(to top,rgba(10,14,23,.85),transparent);}
+  .banner-text{position:relative;z-index:2;text-align:center;padding:0 20px}
+  .banner-text h1{font-family:'Press Start 2P',monospace;font-size:24px;color:#fff;
+    text-shadow:0 0 30px rgba(34,211,165,.8);}
+  .banner-text p{color:var(--muted);margin-top:14px;font-size:14px}
+
+  .section{padding:0 40px 60px}
+  .section h2{font-family:'Press Start 2P',monospace;font-size:14px;
+    color:var(--accent);margin-bottom:24px;letter-spacing:1px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+    overflow:hidden;cursor:pointer;transition:.3s;position:relative;}
+  .card:hover{transform:translateY(-6px);border-color:var(--accent);
+    box-shadow:0 12px 40px rgba(34,211,165,.25);}
+  .card-icon{width:100%;aspect-ratio:1;object-fit:cover;background:#0d1117;display:block;}
+  .card-body{padding:16px}
+  .card-body h3{font-size:16px;margin-bottom:8px}
+  .card-versions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+  .tag{font-size:11px;padding:3px 9px;border-radius:6px;
+    background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3);}
+  .tag.green{background:rgba(34,211,165,.15);color:var(--accent);border-color:rgba(34,211,165,.3)}
+  .tag.orange{background:rgba(251,146,60,.15);color:#fdba74;border-color:rgba(251,146,60,.4)}
+
+  .badge{position:absolute;top:12px;right:12px;font-size:11px;font-weight:800;
+    padding:6px 12px;border-radius:8px;z-index:3;backdrop-filter:blur(6px);}
+  .badge.ready{background:rgba(34,211,165,.9);color:#04140f;}
+  .badge.pre{background:rgba(251,146,60,.9);color:#1a0e00;}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(4,8,15,.85);
+    backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;
+    z-index:200;padding:20px;}
+  .modal-overlay.active{display:flex}
+  .modal{background:var(--bg2);border:1px solid var(--border);border-radius:20px;
+    max-width:760px;width:100%;max-height:90vh;overflow-y:auto;animation:pop .3s ease;position:relative;}
+  @keyframes pop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal-header{display:flex;gap:20px;padding:24px;border-bottom:1px solid var(--border);}
+  .modal-icon{width:110px;height:110px;border-radius:16px;object-fit:cover;
+    border:2px solid var(--accent);box-shadow:0 0 24px rgba(34,211,165,.4);flex-shrink:0;}
+  .modal-info h2{font-size:22px;margin-bottom:10px}
+  .modal-info p{color:var(--muted);font-size:14px;line-height:1.6}
+  .modal-body{padding:24px}
+  .modal-body h4{font-family:'Press Start 2P',monospace;font-size:11px;
+    color:var(--accent);margin:20px 0 12px;}
+  .modal-body h4:first-child{margin-top:0}
+  .download-btn{display:flex;align-items:center;justify-content:center;gap:10px;
+    width:100%;padding:18px;margin-top:28px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border:none;border-radius:14px;cursor:pointer;font-size:16px;font-weight:800;
+    color:#04140f;font-family:'Inter',sans-serif;transition:.25s;text-decoration:none;}
+  .download-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(34,211,165,.5)}
+  .register-btn{display:flex;align-items:center;justify-content:center;gap:10px;
+    width:100%;padding:18px;margin-top:28px;
+    background:linear-gradient(135deg,#fb923c,#f97316);
+    border:none;border-radius:14px;cursor:pointer;font-size:16px;font-weight:800;
+    color:#1a0e00;font-family:'Inter',sans-serif;transition:.25s;}
+  .register-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(251,146,60,.5)}
+  .registered-btn{display:flex;align-items:center;justify-content:center;gap:10px;
+    width:100%;padding:18px;margin-top:28px;
+    background:rgba(34,211,165,.15);border:2px solid var(--accent);
+    border-radius:14px;font-size:16px;font-weight:800;color:var(--accent);cursor:default;}
+  .close-btn{position:absolute;top:12px;right:12px;background:var(--card);
+    border:1px solid var(--border);color:var(--text);width:36px;height:36px;
+    border-radius:10px;cursor:pointer;font-size:18px;z-index:5;}
+
+  .editor{padding:40px;max-width:900px;margin:0 auto}
+  .editor h2{font-family:'Press Start 2P',monospace;font-size:16px;color:var(--accent);margin-bottom:30px;}
+  .form-group{margin-bottom:22px}
+  .form-group label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px;}
+  .form-group input,.form-group textarea,.form-group select{
+    width:100%;padding:14px 16px;background:var(--card);border:1px solid var(--border);
+    border-radius:12px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;transition:.25s;}
+  .form-group input:focus,.form-group textarea:focus{outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(34,211,165,.15);}
+  .form-group textarea{min-height:120px;resize:vertical}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .preview-box{width:160px;height:160px;border-radius:16px;border:2px dashed var(--border);
+    display:flex;align-items:center;justify-content:center;color:var(--muted);
+    font-size:12px;overflow:hidden;margin-top:10px;text-align:center;padding:10px;}
+  .preview-box img{width:100%;height:100%;object-fit:cover}
+  .preview-box.wide{width:100%;height:160px}
+  .btn-save{padding:16px 36px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border:none;border-radius:14px;cursor:pointer;font-size:15px;font-weight:800;
+    color:#04140f;transition:.25s;}
+  .btn-save:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(34,211,165,.5)}
+  .btn-cancel{padding:16px 36px;background:none;border:1px solid var(--border);
+    border-radius:14px;cursor:pointer;color:var(--text);font-weight:600;margin-left:12px;}
+  .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+  .empty p{font-size:14px;margin-bottom:20px}
+  .hidden{display:none!important}
+  .admin-bar{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .mini-btn{font-size:12px;padding:8px 14px;border-radius:8px;cursor:pointer;
+    border:1px solid var(--border);background:var(--card);color:var(--text);transition:.2s}
+  .mini-btn:hover{border-color:var(--accent)}
+  .mini-btn.danger:hover{border-color:#ef4444;color:#ef4444}
+  .mini-btn.status{background:rgba(34,211,165,.1);border-color:var(--accent);color:var(--accent)}
+  .banner-edit{margin:0 40px 10px;display:flex;gap:10px;justify-content:flex-end}
+  .status-switch{display:flex;gap:10px;margin-top:10px}
+  .status-opt{flex:1;padding:14px;border-radius:12px;border:2px solid var(--border);
+    background:var(--card);cursor:pointer;text-align:center;transition:.2s;font-size:14px;font-weight:600}
+  .status-opt:hover{border-color:var(--accent)}
+  .status-opt.active{border-color:var(--accent);background:rgba(34,211,165,.1);color:var(--accent)}
+  .status-opt.active.pre{border-color:#fb923c;background:rgba(251,146,60,.1);color:#fb923c}
+  .notify{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);
+    background:var(--accent);color:#04140f;padding:16px 28px;border-radius:14px;
+    font-weight:800;transition:.4s;z-index:300;box-shadow:0 10px 40px rgba(34,211,165,.5);}
+  .notify.show{transform:translateX(-50%) translateY(0)}
+  .reg-list{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">MC MAPS</div>
+  <nav>
+    <button onclick="showPage('home')">Галерея</button>
+    <button class="primary" onclick="showPage('editor')">+ Добавить карту</button>
+  </nav>
+</header>
+
+<!-- ================= ГЛАВНАЯ ================= -->
+<div id="page-home">
+  <div class="banner" id="banner">
+    <div class="banner-text">
+      <h1 id="bannerTitle">Карты Minecraft</h1>
+      <p id="bannerDesc">Лучшие приключения в кубическом мире</p>
+    </div>
+  </div>
+  <div class="banner-edit">
+    <button class="mini-btn" onclick="editBanner()">✏️ Редактировать баннер</button>
+  </div>
+
+  <div class="section">
+    <h2>// ВСЕ КАРТЫ</h2>
+    <div class="grid" id="cardsGrid"></div>
+    <div class="empty hidden" id="emptyState">
+      <p>Пока нет ни одной карты. Добавь первую!</p>
+      <button class="btn-save" onclick="showPage('editor')">+ Добавить карту</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= РЕДАКТОР ================= -->
+<div id="page-editor" class="hidden">
+  <div class="editor">
+    <h2 id="editorTitle">// ДОБАВИТЬ КАРТУ</h2>
+    <input type="hidden" id="editId">
+
+    <div class="form-group">
+      <label>Название карты *</label>
+      <input id="fTitle" placeholder="Например: SkyBlock Adventure">
+    </div>
+
+    <div class="form-group">
+      <label>Краткое описание (в карточке)</label>
+      <input id="fShort" placeholder="Одна строка о карте">
+    </div>
+
+    <div class="form-group">
+      <label>Полное описание</label>
+      <textarea id="fDesc" placeholder="Подробное описание карты, сюжет, особенности..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Версии игры (через запятую)</label>
+      <input id="fVersions" placeholder="1.20.1, 1.20.4, 1.21">
+      <div class="hint">Каждая версия станет отдельным тегом</div>
+    </div>
+
+    <!-- СТАТУС КАРТЫ -->
+    <div class="form-group">
+      <label>Статус карты *</label>
+      <div class="status-switch">
+        <div class="status-opt active" id="optReady" onclick="setStatus('ready')">✅ Доступна для скачивания</div>
+        <div class="status-opt" id="optPre" onclick="setStatus('pre')">🔔 Предрегистрация</div>
+      </div>
+      <div class="hint" id="statusHint">Карту можно скачать прямо сейчас</div>
+    </div>
+
+    <div class="form-group">
+      <label>Иконка карты * (строго 1024×1024)</label>
+      <input type="file" id="fIcon" accept="image/*">
+      <div class="preview-box" id="iconPreview">Нет иконки</div>
+    </div>
+
+    <div class="form-group">
+      <label>Файл карты (.zip / .mcworld)</label>
+      <input type="file" id="fFile" accept=".zip,.mcworld,.rar">
+      <div class="hint" id="fileHint">Файл для скачивания</div>
+    </div>
+
+    <button class="btn-save" onclick="saveCard()">💾 Сохранить карту</button>
+    <button class="btn-cancel" onclick="showPage('home')">Отмена</button>
+  </div>
+</div>
+
+<!-- ================= МОДАЛКА КАРТЫ ================= -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- ================= МОДАЛКА БАННЕРА ================= -->
+<div class="modal-overlay" id="bannerModal" onclick="if(event.target===this)closeBannerModal()">
+  <div class="modal" style="max-width:560px">
+    <button class="close-btn" onclick="closeBannerModal()">✕</button>
+    <div class="modal-body">
+      <h2 style="font-family:'Press Start 2P';font-size:13px;color:var(--accent);margin-bottom:24px">// РЕДАКТОР БАННЕРА</h2>
+      <div class="form-group">
+        <label>Заголовок</label>
+        <input id="bTitle" placeholder="Карты Minecraft">
+      </div>
+      <div class="form-group">
+        <label>Подзаголовок</label>
+        <input id="bDesc" placeholder="Лучшие приключения...">
+      </div>
+      <div class="form-group">
+        <label>Картинка баннера</label>
+        <input type="file" id="bImg" accept="image/*">
+        <div class="preview-box wide" id="bannerPreview">Нет картинки</div>
+      </div>
+      <button class="btn-save" onclick="saveBanner()">💾 Сохранить баннер</button>
+    </div>
+  </div>
+</div>
+
+<!-- уведомление -->
+<div class="notify" id="notify"></div>
+
+<script>
+/* ================= ХРАНИЛИЩЕ ================= */
+const DB = {
+  get cards(){ return JSON.parse(localStorage.getItem('mc_cards')||'[]'); },
+  set cards(v){ localStorage.setItem('mc_cards', JSON.stringify(v)); },
+  get banner(){ return JSON.parse(localStorage.getItem('mc_banner')||'null'); },
+  set banner(v){ localStorage.setItem('mc_banner', JSON.stringify(v)); },
+  get registrations(){ return JSON.parse(localStorage.getItem('mc_regs')||'{}'); },
+  set registrations(v){ localStorage.setItem('mc_regs', JSON.stringify(v)); }
+};
+
+let editingIcon = null;
+let editingFile = null;
+let editingBannerImg = null;
+let currentStatus = 'ready';
+
+/* ================= УВЕДОМЛЕНИЕ ================= */
+function showNotify(msg){
+  const n = document.getElementById('notify');
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'), 4000);
+}
+
+/* ================= СТРАНИЦЫ ================= */
+function showPage(p){
+  document.getElementById('page-home').classList.toggle('hidden', p!=='home');
+  document.getElementById('page-editor').classList.toggle('hidden', p!=='editor');
+  if(p==='editor') resetForm();
+  if(p==='home') renderAll();
+}
+
+/* ================= СТАТУС ================= */
+function setStatus(s){
+  currentStatus = s;
+  document.getElementById('optReady').classList.toggle('active', s==='ready');
+  document.getElementById('optReady').classList.remove('pre');
+  document.getElementById('optPre').classList.toggle('active', s==='pre');
+  document.getElementById('optPre').classList.toggle('pre', s==='pre');
+  document.getElementById('statusHint').textContent = s==='ready'
+    ? 'Карту можно скачать прямо сейчас'
+    : 'Люди смогут зарегистрироваться и получат уведомление, когда карта выйдет';
+}
+
+/* ================= РЕНДЕР ================= */
+function renderAll(){
+  renderBanner();
+  renderCards();
+}
+
+function renderBanner(){
+  const b = DB.banner;
+  const bannerEl = document.getElementById('banner');
+  if(b){
+    document.getElementById('bannerTitle').textContent = b.title || 'Карты Minecraft';
+    document.getElementById('bannerDesc').textContent = b.desc || '';
+    if(b.img){
+      bannerEl.style.backgroundImage = `linear-gradient(rgba(10,14,23,.5),rgba(10,14,23,.7)), url(${b.img})`;
+    }
+  }
+}
+
+function renderCards(){
+  const grid = document.getElementById('cardsGrid');
+  const empty = document.getElementById('emptyState');
+  const cards = DB.cards;
+  grid.innerHTML = '';
+  if(cards.length===0){ empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+
+  cards.forEach(card=>{
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.onclick = ()=>openCard(card.id);
+    const vers = (card.versions||[]).map(v=>`<span class="tag green">${v}</span>`).join('');
+    const isPre = card.status === 'pre';
+    el.innerHTML = `
+      <div class="badge ${isPre?'pre':'ready'}">${isPre?'🔔 Предрегистрация':'✅ Доступна'}</div>
+      <img class="card-icon" src="${card.icon}" alt="${card.title}">
+      <div class="card-body">
+        <h3>${card.title}</h3>
+        <p style="color:var(--muted);font-size:13px">${card.short||''}</p>
+        <div class="card-versions">${vers}</div>
+      </div>`;
+    grid.appendChild(el);
+  });
+}
+
+/* ================= ОТКРЫТИЕ КАРТЫ ================= */
+function openCard(id){
+  const c = DB.cards.find(x=>x.id===id);
+  if(!c) return;
+  const vers = (c.versions||[]).map(v=>`<span class="tag green">${v}</span>`).join('');
+  const isPre = c.status === 'pre';
+  const regs = DB.registrations;
+  const regCount = (regs[id]||[]).length;
+  const alreadyReg = (regs[id]||[]).includes(getUserName());
+
+  let actionHtml = '';
+  if(isPre){
+    if(alreadyReg){
+      actionHtml = `<div class="registered-btn">✅ Вы зарегистрированы</div>
+        <div class="reg-list">Уведомим вас, когда карта выйдет в общий доступ. Всего записалось: ${regCount}</div>`;
+    } else {
+      actionHtml = `<button class="register-btn" onclick="registerUser('${c.id}')">🔔 Зарегистрироваться</button>
+        <div class="reg-list">Записалось уже: ${regCount}</div>`;
+    }
+  } else {
+    actionHtml = c.file
+      ? `<a class="download-btn" href="${c.file}" download="${c.title}.zip">⬇ Скачать карту</a>`
+      : `<div class="download-btn" style="opacity:.5;cursor:not-allowed">Файл не загружен</div>`;
+  }
+
+  const statusSwitcher = isPre
+    ? `<button class="mini-btn status" onclick="switchStatus('${c.id}','ready')">✅ Открыть общий доступ</button>`
+    : `<button class="mini-btn" onclick="switchStatus('${c.id}','pre')">🔔 Перевести в предрегистрацию</button>`;
+
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML = `
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <div class="modal-header">
+      <img class="modal-icon" src="${c.icon}">
+      <div class="modal-info">
+        <h2>${c.title}</h2>
+        <p>${c.short||''}</p>
+        <div class="card-versions" style="margin-top:10px">${isPre?'<span class="tag orange">🔔 Предрегистрация</span>':'<span class="tag green">✅ Доступна</span>'}</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <h4>// ОПИСАНИЕ</h4>
+      <p style="color:var(--muted);line-height:1.7;font-size:14px">${(c.desc||'Описание не указано').replace(/\n/g,'<br>')}</p>
+      <h4>// ВЕРСИИ ИГРЫ</h4>
+      <div class="card-versions">${vers||'<span style="color:var(--muted)">Не указаны</span>'}</div>
+      ${actionHtml}
+      <div class="admin-bar">
+        ${statusSwitcher}
+        <button class="mini-btn" onclick="editCard('${c.id}')">✏️ Редактировать</button>
+        <button class="mini-btn danger" onclick="deleteCard('${c.id}')">🗑 Удалить</button>
+      </div>
+    </div>`;
+  document.getElementById('modal').classList.add('active');
+}
+
+function closeModal(){ document.getElementById('modal').classList.remove('active'); }
+
+/* ================= РЕГИСТРАЦИЯ ================= */
+function getUserName(){
+  let name = localStorage.getItem('mc_user');
+  if(!name){
+    name = prompt('Введите ваше имя (для регистрации на карту):');
+    if(!name) name = 'Игрок' + Math.floor(Math.random()*9999);
+    localStorage.setItem('mc_user', name);
+  }
+  return name;
+}
+
+function registerUser(id){
+  const name = getUserName();
+  const regs = DB.registrations;
+  if(!regs[id]) regs[id] = [];
+  if(!regs[id].includes(name)) regs[id].push(name);
+  DB.registrations = regs;
+  showNotify(`✅ ${name}, вы зарегистрированы! Уведомим когда карта выйдет.`);
+  openCard(id); // обновить модалку
+}
+
+function switchStatus(id, status){
+  const cards = DB.cards;
+  const idx = cards.findIndex(x=>x.id===id);
+  if(idx<0) return;
+  cards[idx].status = status;
+  DB.cards = cards;
+  showNotify(status==='ready' ? '✅ Карта открыта для всех!' : '🔔 Карта переведена в предрегистрацию');
+  closeModal();
+  renderAll();
+}
+
+/* ================= РЕДАКТОР КАРТЫ ================= */
+function resetForm(){
+  document.getElementById('editId').value = '';
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fShort').value = '';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fVersions').value = '';
+  document.getElementById('fIcon').value = '';
+  document.getElementById('fFile').value = '';
+  document.getElementById('iconPreview').innerHTML = 'Нет иконки';
+  document.getElementById('fileHint').textContent = 'Файл для скачивания';
+  document.getElementById('editorTitle').textContent = '// ДОБАВИТЬ КАРТУ';
+  editingIcon = null; editingFile = null;
+  setStatus('ready');
+}
+
+function editCard(id){
+  closeModal();
+  const c = DB.cards.find(x=>x.id===id);
+  if(!c) return;
+  showPage('editor');
+  document.getElementById('editorTitle').textContent = '// РЕДАКТИРОВАТЬ КАРТУ';
+  document.getElementById('editId').value = c.id;
+  document.getElementById('fTitle').value = c.title;
+  document.getElementById('fShort').value = c.short||'';
+  document.getElementById('fDesc').value = c.desc||'';
+  document.getElementById('fVersions').value = (c.versions||[]).join(', ');
+  editingIcon = c.icon;
+  editingFile = c.file;
+  document.getElementById('iconPreview').innerHTML = `<img src="${c.icon}">`;
+  if(c.file) document.getElementById('fileHint').textContent = '✓ Файл уже загружен (можно заменить)';
+  setStatus(c.status || 'ready');
+}
+
+/* Загрузка иконки с проверкой 1024×1024 */
+document.getElementById('fIcon').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    const img = new Image();
+    img.onload = ()=>{
+      if(img.width!==1024 || img.height!==1024){
+        alert(`⚠️ Иконка должна быть строго 1024×1024!\nТвоя: ${img.width}×${img.height}`);
+        e.target.value='';
+        return;
+      }
+      editingIcon = ev.target.result;
+      document.getElementById('iconPreview').innerHTML = `<img src="${ev.target.result}">`;
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+/* Загрузка файла карты */
+document.getElementById('fFile').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    editingFile = ev.target.result;
+    document.getElementById('fileHint').textContent = `✓ ${file.name} (${(file.size/1024/1024).toFixed(2)} МБ)`;
+  };
+  reader.readAsDataURL(file);
+});
+
+function saveCard(){
+  const id = document.getElementById('editId').value;
+  const title = document.getElementById('fTitle').value.trim();
+  const short = document.getElementById('fShort').value.trim();
+  const desc = document.getElementById('fDesc').value.trim();
+  const versions = document.getElementById('fVersions').value.split(',').map(v=>v.trim()).filter(Boolean);
+
+  if(!title){ alert('Введи название карты'); return; }
+  if(!editingIcon){ alert('Загрузи иконку 1024×1024'); return; }
+
+  const cards = DB.cards;
+  if(id){
+    const idx = cards.findIndex(x=>x.id===id);
+    cards[idx] = {...cards[idx], title, short, desc, versions, icon:editingIcon, file:editingFile, status:currentStatus};
+  } else {
+    cards.push({
+      id: Date.now().toString(),
+      title, short, desc, versions,
+      icon: editingIcon, file: editingFile,
+      status: currentStatus
+    });
+  }
+  DB.cards = cards;
+  showNotify('✅ Карта сохранена!');
+  showPage('home');
+}
+
+function deleteCard(id){
+  if(!confirm('Удалить карту? Это действие нельзя отменить.')) return;
+  DB.cards = DB.cards.filter(x=>x.id!==id);
+  closeModal();
+  renderAll();
+}
+
+/* ================= БАННЕР ================= */
+function editBanner(){
+  const b = DB.banner || {};
+  document.getElementById('bTitle').value = b.title || '';
+  document.getElementById('bDesc').value = b.desc || '';
+  editingBannerImg = b.img || null;
+  document.getElementById('bannerPreview').innerHTML = b.img ? `<img src="${b.img}">` : 'Нет картинки';
+  document.getElementById('bannerModal').classList.add('active');
+}
+function closeBannerModal(){ document.getElementById('bannerModal').classList.remove('active'); }
+
+document.getElementById('bImg').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    editingBannerImg = ev.target.result;
+    document.getElementById('bannerPreview').innerHTML = `<img src="${ev.target.result}">`;
+  };
+  reader.readAsDataURL(file);
+});
+
+function saveBanner(){
+  DB.banner = {
+    title: document.getElementById('bTitle').value,
+    desc: document.getElementById('bDesc').value,
+    img: editingBannerImg
+  };
+  closeBannerModal();
+  renderBanner();
+  showNotify('✅ Баннер обновлён');
+}
+
+/* ================= СТАРТ ================= */
+renderAll();
+</script>
+</body>
+</html>
