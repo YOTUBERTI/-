@@ -1,5 +1,5 @@
 index.html
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -42,7 +42,17 @@ index.html
   .banner-text h1{font-family:'Press Start 2P',monospace;font-size:26px;color:#fff;
     text-shadow:0 0 30px rgba(34,211,165,.8);line-height:1.5;}
   .banner-text p{color:#cfd8e6;margin-top:16px;font-size:15px;text-shadow:0 2px 10px rgba(0,0,0,.8)}
-  .banner-actions{margin:0 40px 12px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+  
+  /* ИСПРАВЛЕННЫЙ БЛОК С КНОПКОЙ */
+  .banner-actions{margin:0 40px 12px;display:flex;justify-content:flex-end}
+  .banner-actions button {
+    width: auto;
+    height: auto;
+    padding: 8px 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   .section{padding:0 40px 60px}
   .section h2{font-family:'Press Start 2P',monospace;font-size:14px;color:var(--accent);
@@ -168,7 +178,7 @@ index.html
     </div>
   </div>
   
-  <!-- Та самая маленькая кнопка под баннером -->
+  <!-- Кнопка баннера -->
   <div class="banner-actions">
     <button class="mini-btn banner" onclick="editBanner()">✏️ Редактировать баннер</button>
   </div>
@@ -244,7 +254,7 @@ index.html
   <div class="modal" id="modalContent"></div>
 </div>
 
-<!-- ================= РЕДАКТОР БАННЕРА (ТОТ САМЫЙ ПРОСТОЙ) ================= -->
+<!-- ================= РЕДАКТОР БАННЕРА ================= -->
 <div class="modal-overlay" id="bannerModal" onclick="if(event.target===this)closeBannerModal()">
   <div class="modal" style="max-width:560px">
     <button class="close-btn" onclick="closeBannerModal()">✕</button>
@@ -572,4 +582,4 @@ function saveBanner(){
 renderAll();
 </script>
 </body>
-  </html>
+</html>               
